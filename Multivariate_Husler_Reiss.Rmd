@@ -4,72 +4,9 @@ author: "Nicolas Torres"
 date: "2025-07-29"
 output: html_document
 ---
-# Skip to before-last cell, the rest are tests
+
 
 ```{r}
-library(graphicalExtremes)
-n <- 100
-d <- 5
-G <- cbind(
-  c(0.0, 1.6, 4.0, 6.0, 0.5),
-  c(1.6, 0.0, 2.0, 1.0, 7.0),
-  c(4.0, 2.0, 0.0, 3.5, 0.75),
-  c(6.0, 1.0, 3.5, 0.0, 2.3),
-  c(0.5, 7.0, 0.75, 2.3, 0.0)
-)
-
-pareto_points <- rmpareto(n=n, model="HR", d=d, par=G)
-pareto_points
-```
-```{r}
-checkGamma(G)
-```
-```{r}
-G2 <- cbind(
-  c(0.0,1.2,1.8,2.0,4.0),
-  c(1.2,0.0,1.0,0.8,1.4),
-  c(1.8,1.0,0.0,1.4,0.8),
-  c(2.0,0.8,1.4,0.0,1.6),
-  c(4.0,1.4,0.8,1.6,0.0)
-)
-checkGamma(G2, returnBoolean = TRUE)
-```
-So we try again with the valid variogram:
-```{r}
-n <- 10
-pareto_points <- rmpareto(n=n, model="HR", d=d, par=G2)
-pareto_points
-```
-```{r}
-# 5-d HR:
-HR_multidim <- exp(-1/pareto_points)
-HR_multidim
-```
-Another variogram could be
-```{r}
-n <- 10
-d <- 5
-G3 <- cbind(
-  c(0.0,0.2,0.6,1.4,1.8),
-  c(0.2,0.0,0.4,1.2,1.6),
-  c(0.6,0.4,0.0,1.0,1.4),
-  c(1.4,1.2,1.0,0.0,0.8),
-  c(1.8,1.6,1.4,0.8,0.0)
-)
-print(checkGamma(G3, returnBoolean = TRUE))
-
-pareto_points_2 <- rmpareto(n=n, model="HR", d=d, par=G3)
-HR_multidim_2 <- exp(-1/pareto_points_2)
-print(HR_multidim_2)
-```
-Lastly, we produce 10 000 points of this copula and save!
-# Main cell!
-```{r}
-library(graphicalExtremes)
-library(RcppCNPy)
-
-n <- 10000
-d <- 5
 Gamma <- cbind(
   c(0.0,0.2,0.6,1.4,1.8),
   c(0.2,0.0,0.4,1.2,1.6),
@@ -77,14 +14,30 @@ Gamma <- cbind(
   c(1.4,1.2,1.0,0.0,0.8),
   c(1.8,1.6,1.4,0.8,0.0)
 )
+print(checkGamma(Gamma, returnBoolean = TRUE))
+```
 
-pareto_points <- rmpareto(n=n, model="HR", d=d, par=Gamma)
-HR_5_dim <- exp(-1/pareto_points)
+```{r}
+library(graphicalExtremes)
+library(RcppCNPy)
+
+n <- 10000
+d <- 5
+
+X <- rmstable(n, model = "HR", d = d, par = Gamma)  # unit-Fréchet max-stable
+HR_5_dim <- exp(-1 / X)
 
 npySave("HR_5_dim.npy", HR_5_dim)
 ```
 
 ```{r}
-head(HR_5_dim)
-```
+# for big sample
 
+big <- 250000
+
+
+X_big <- rmstable(big, model = "HR", d = d, par = Gamma)  # unit-Fréchet max-stable
+HR_5_dim_big <- exp(-1 / X_big)
+
+npySave("HR_5_dim_big.npy", HR_5_dim_big)
+```
